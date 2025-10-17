@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { fruitAPI } from '../services/api';
+import { useNavigate, Link } from 'react-router-dom';
+
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -12,6 +14,8 @@ const Dashboard = () => {
   const [success, setSuccess] = useState('');
   
   const { user, logout } = useAuth();
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchFruits();
@@ -68,6 +72,10 @@ const Dashboard = () => {
     logout();
   };
 
+  const goToRoomPage = () => {
+    navigate('/room');
+  }
+
   return (
     <div className="dashboard-container">
       <header className="dashboard-header">
@@ -78,9 +86,24 @@ const Dashboard = () => {
             <button onClick={handleLogout} className="logout-button">
               Logout
             </button>
+            <button onClick={goToRoomPage} className="logout-button">
+              Rooms
+            </button>
           </div>
         </div>
       </header>
+      {/* <div className="dashboard-container">
+      <header className="dashboard-header">
+        <div className="header-content">
+          <h1>Fruit Management Dashboard</h1>
+          <div className="user-info">
+            <span>Welcome, {user?.username}!</span>
+            
+              Logout
+            </button>
+          </div>
+        </div>
+      </header> */}
 
       <main className="dashboard-main">
         <div className="add-fruit-section">

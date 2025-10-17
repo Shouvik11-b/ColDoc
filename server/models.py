@@ -1,8 +1,20 @@
-# models.py
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from database import Base
 from datetime import datetime
+
+
+# Association Model
+class UserRoom(Base):
+    __tablename__ = "userroom"
+
+    id = Column(Integer, primary_key=True, index=True)
+    room_id = Column(Integer, ForeignKey("rooms.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    role = Column(String, default="member")  # optional extra field
+    # Relationships
+    room = relationship("Room", back_populates="user_rooms")
+    user = relationship("User", back_populates="user_rooms")
 
 
 class User(Base):
@@ -14,8 +26,22 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    # Relationship with fruits
-    fruits = relationship("Fruit", back_populates="owner")
+    # Link to association table
+    user_rooms = relationship("UserRoom", back_populates="user", cascade="all, delete-orphan")
+
+    # Example: if you still have fruits
+    fruits = relationship("Fruit", back_populates="owner", cascade="all, delete-orphan")
+
+
+class Room(Base):
+    __tablename__ = "rooms"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True, index=True, nullable=False)
+    content = Column(String, nullable=True)
+
+    # Link to association table
+    user_rooms = relationship("UserRoom", back_populates="room", cascade="all, delete-orphan")
 
 
 class Fruit(Base):
@@ -27,5 +53,4 @@ class Fruit(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    # Relationship with user
     owner = relationship("User", back_populates="fruits")

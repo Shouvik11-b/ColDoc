@@ -131,6 +131,31 @@ def create_fruit(
 
     return db_fruit
 
+@app.post("/room")
+def create_room(room: schema.RoomCreate,
+                current_user: models.User = Depends(auth.get_current_user),
+                db: Session = Depends(get_db)):
+    """Create a new room."""
+    print("Received room:", room)
+    db_room = models.Room(name=room.name)
+    db.add(db_room)
+    db.commit()
+    db.refresh(db_room)
+    db_userroom = models.UserRoom(user_id=current_user.id, room_id=db_room.id, role="owner")
+    db.add(db_userroom)
+    db.commit()
+    db.refresh(db_userroom)
+    return {"room_id": db_room.id, "name": db_room.name}
+
+
+@app.get("/room", response_model=List[schema.RoomResponse])
+def get_room(
+        current_user: models.User = Depends(auth.get_current_user),
+        db: Session = Depends(get_db)
+):
+    """Get all rooms for the current user."""
+    rooms = db.query(models.Room).join(models.UserRoom).filter(models.UserRoom.user_id == current_user.id).all()
+    return rooms
 
 @app.get("/me", response_model=schema.UserResponse)
 def read_users_me(current_user: models.User = Depends(auth.get_current_user)):

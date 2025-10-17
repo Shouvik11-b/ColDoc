@@ -69,4 +69,16 @@ export const fruitAPI = {
   }
 };
 
+export const roomAPI = {
+  getRooms: async () => {
+    const res = await api.get('/room');
+    return res.data;
+  },
+  
+  createRoom: async (roomData) => {
+    const res = await api.post('/room', roomData);
+    return res.data;
+  }
+};
+
 export default api;

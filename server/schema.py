@@ -42,6 +42,14 @@ class FruitResponse(BaseModel):
     class Config:
         from_attributes = True
 
+# Room Schemas
+class RoomCreate(BaseModel):
+    name: str
+
+class RoomResponse(BaseModel):
+    name: str
+    id: int
+
 
 # Token Schemas
 class Token(BaseModel):
