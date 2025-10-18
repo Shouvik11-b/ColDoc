@@ -78,6 +78,12 @@ export const roomAPI = {
   createRoom: async (roomData) => {
     const res = await api.post('/room', roomData);
     return res.data;
+  },
+
+  addToRoom: async (roomId) => {
+    console.log(roomId);
+    const res = await api.post('/addToRoom', { id: roomId });
+    return res.data;
   }
 };
 

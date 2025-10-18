@@ -46,6 +46,9 @@ class FruitResponse(BaseModel):
 class RoomCreate(BaseModel):
     name: str
 
+class AddToRoom(BaseModel):
+    id: int
+
 class RoomResponse(BaseModel):
     name: str
     id: int

@@ -7,6 +7,7 @@ import './Dashboard.css';
 const RoomsDashboard = () => {
   const [rooms, setRooms] = useState([]);
   const [newRoomName, setNewRoomName] = useState('');
+  const [newRoomId, setNewRoomId] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -69,6 +70,37 @@ const RoomsDashboard = () => {
     navigate(`/room/${roomId}`);
   };
 
+  const handleAddToRoomClick = (e) => {
+    setNewRoomId(Number(e.target.value))
+  }
+
+  const handleAddToRoom = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+
+    if (!newRoomId) {
+      setError('Please enter a room id');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      // Only send { name: "..." } as the payload
+      const createdRoom = await roomAPI.addToRoom(newRoomId);
+      setRooms([...rooms, createdRoom]);
+      setNewRoomId('');
+      setSuccess('Room added successfully!');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      setError('Failed to add to room');
+      console.error('Error adding to room:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
   return (
     <div className="dashboard-container">
       <header className="dashboard-header">
@@ -105,6 +137,24 @@ const RoomsDashboard = () => {
 
             <button type="submit" disabled={loading} className="add-button">
               {loading ? 'Creating...' : 'Create Room'}
+            </button>
+          </form>
+          <form onSubmit={handleAddToRoom} className="room-form">
+            <div className="form-group">
+              <label htmlFor="name">Room Id:</label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={newRoomId}
+                onChange={handleAddToRoomClick}
+                placeholder="e.g., Dev Team"
+                required
+              />
+            </div>
+
+            <button type="submit" disabled={loading} className="add-button">
+              {loading ? 'Creating...' : 'Add to Room'}
             </button>
           </form>
         </div>

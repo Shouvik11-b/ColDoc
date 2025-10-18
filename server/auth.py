@@ -10,6 +10,8 @@ import models
 import schema
 from database import get_db
 import hashlib
+from database import SessionLocal
+from models import User
 
 # Configuration
 SECRET_KEY = "your-secret-key-change-this-in-production"  # Change this in production
@@ -112,4 +114,26 @@ def authenticate_user(db: Session, username: str, password: str):
         return False
     if not verify_password(password, user.hashed_password):
         return False
+    return user
+
+def verify_token_raw(token: str):
+    """Verify JWT token outside of FastAPI (for socket connections)."""
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise ValueError("Invalid token payload")
+        return username
+    except JWTError:
+        raise ValueError("Invalid or expired token")
+
+
+def get_user_from_socket_token(token: str):
+    """Return User object from JWT token for socket connections."""
+    username = verify_token_raw(token)
+    db = SessionLocal()
+    user = db.query(User).filter(User.username == username).first()
+    db.close()
+    if not user:
+        raise ValueError("User not found")
     return user

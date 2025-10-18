@@ -1,16 +1,32 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useContext } from 'react';
 import { io } from 'socket.io-client';
 import { useParams } from "react-router-dom";
 
 
+
+// const token = localStorage.getItem('token');
 // Connect to FastAPI websocket (make sure FastAPI uses socket.io integration)
-const socket = io('http://localhost:8000', {
-  path: '/ws/sockets',
-  transports: ['websocket'],
-});
+// const socket = io('http://localhost:8000', {
+//   path: '/ws/sockets',
+//   transports: ['websocket'],
+//   auth: {
+//       token: token,
+//       room_id: roomid,
+//     },
+// });
 
 function DocRoom() {
     const { roomid } = useParams();
+    const token = localStorage.getItem('token');
+
+    const socket = io('http://localhost:8000', {
+  path: '/ws/sockets',
+  transports: ['websocket'],
+  auth: {
+      token: token,
+      room_id: roomid,
+    },
+});
 
 //   return (
 //     <div>
@@ -18,14 +34,15 @@ function DocRoom() {
 //     </div>
 //   );
 
-
-  const [isConnected, setIsConnected] = useState(socket.connected);
+  const [isConnected, setIsConnected] = useState(socket ? socket.connected:false);
   const [documentText, setDocumentText] = useState('');
   const ignoreChange = useRef(false);
+  
 
   useEffect(() => {
+    
     socket.on('connect', () => setIsConnected(socket.connected));
-    socket.on('disconnect', () => setIsConnected(socket.disconnect));
+    socket.on('disconnect', () => setIsConnected(socket.connected));
 
     // When another user edits, update the local document
     socket.on('document_update', (newText) => {

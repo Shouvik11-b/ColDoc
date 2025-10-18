@@ -5,6 +5,7 @@ from fastapi.security import HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from datetime import timedelta
 from typing import List
+from sockets import sio_app
 
 import models
 import schema
@@ -16,6 +17,8 @@ models.Base.metadata.create_all(bind=engine)
 
 # Initialize FastAPI app
 app = FastAPI(title="Fruit Management API", version="1.0.0")
+app.mount('/ws', app = sio_app)
+
 
 # CORS middleware
 app.add_middleware(
@@ -156,6 +159,18 @@ def get_room(
     """Get all rooms for the current user."""
     rooms = db.query(models.Room).join(models.UserRoom).filter(models.UserRoom.user_id == current_user.id).all()
     return rooms
+
+@app.post("/addToRoom", response_model=schema.RoomResponse)
+def add_to_room(room: schema.AddToRoom, current_user: models.User = Depends(auth.get_current_user),
+        db: Session = Depends(get_db)):
+    db_userroom = models.UserRoom(user_id=current_user.id, room_id=room.id)
+    db.add(db_userroom)
+    db.commit()
+    db.refresh(db_userroom)
+    room = db.query(models.Room).filter(models.Room.id == room.id).first()
+
+    return room
+
 
 @app.get("/me", response_model=schema.UserResponse)
 def read_users_me(current_user: models.User = Depends(auth.get_current_user)):
