@@ -3,7 +3,6 @@ from auth import get_user_from_socket_token
 from models import UserRoom, Room, User
 from database import SessionLocal, engine
 from sqlalchemy.orm import Session
-import redis.asyncio as redis
 
 
 sio_server = socketio.AsyncServer(
@@ -12,8 +11,7 @@ sio_server = socketio.AsyncServer(
 )
 
 sio_app = socketio.ASGIApp(socketio_server=sio_server,socketio_path='sockets')
-r = redis.Redis(host='localhost', port=6379, db=0)
-SAVE_INTERVAL = 5
+
 document_text = ""
 
 @sio_server.event
@@ -32,7 +30,8 @@ async def connect(sid, environ, auth):
 
     try:
         # Example: Check if user is already in the room
-        doc_text = db.query(Room.content).filter(Room.id == room_id).first()
+        room = db.query(Room).filter(Room.id == room_id).first()
+        doc_text = room.content if room else ""
 
     except Exception as e:
         print("DB error:", e)
@@ -46,8 +45,11 @@ async def connect(sid, environ, auth):
 @sio_server.event
 async def edit_document(sid, doc):
     print(f'{sid}: doc changed')
+    session = await sio_server.get_session(sid)
+    room_id = session.get("room_id")
     global doc_text
     doc_text = doc
+
 
     db: Session = SessionLocal()
     try:
@@ -64,7 +66,7 @@ async def edit_document(sid, doc):
     finally:
         db.close()
 
-    await sio_server.emit("document_update", document_text, skip_sid=sid)
+    await sio_server.emit("document_update", doc_text, skip_sid=sid)
 
 
 @sio_server.event
