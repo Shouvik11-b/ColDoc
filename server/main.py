@@ -105,34 +105,34 @@ def login_user(user_credentials: schema.UserLogin, db: Session = Depends(get_db)
     }
 
 
-@app.get("/fruit", response_model=List[schema.FruitResponse])
-def get_fruits(
-        current_user: models.User = Depends(auth.get_current_user),
-        db: Session = Depends(get_db)
-):
-    """Get all fruits for the current user."""
-    fruits = db.query(models.Fruit).filter(models.Fruit.user_id == current_user.id).all()
-    return fruits
+# @app.get("/fruit", response_model=List[schema.FruitResponse])
+# def get_fruits(
+#         current_user: models.User = Depends(auth.get_current_user),
+#         db: Session = Depends(get_db)
+# ):
+#     """Get all fruits for the current user."""
+#     fruits = db.query(models.Fruit).filter(models.Fruit.user_id == current_user.id).all()
+#     return fruits
 
 
-@app.post("/fruit", response_model=schema.FruitResponse)
-def create_fruit(
-        fruit: schema.FruitCreate,
-        current_user: models.User = Depends(auth.get_current_user),
-        db: Session = Depends(get_db)
-):
-    """Create a new fruit for the current user."""
-    db_fruit = models.Fruit(
-        name=fruit.name,
-        colour=fruit.colour,
-        user_id=current_user.id
-    )
-
-    db.add(db_fruit)
-    db.commit()
-    db.refresh(db_fruit)
-
-    return db_fruit
+# @app.post("/fruit", response_model=schema.FruitResponse)
+# def create_fruit(
+#         fruit: schema.FruitCreate,
+#         current_user: models.User = Depends(auth.get_current_user),
+#         db: Session = Depends(get_db)
+# ):
+#     """Create a new fruit for the current user."""
+#     db_fruit = models.Fruit(
+#         name=fruit.name,
+#         colour=fruit.colour,
+#         user_id=current_user.id
+#     )
+#
+#     db.add(db_fruit)
+#     db.commit()
+#     db.refresh(db_fruit)
+#
+#     return db_fruit
 
 @app.post("/room")
 def create_room(room: schema.RoomCreate,

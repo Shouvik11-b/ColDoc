@@ -1,12 +1,8 @@
 import socketio
 from auth import get_user_from_socket_token
-from models import UserRoom, Room, User
-from database import SessionLocal, engine
-from sqlalchemy.orm import Session
 import redis.asyncio as redis
 import json
 from typing import Dict, List, Any
-from datetime import datetime
 
 sio_server = socketio.AsyncServer(
     cors_allowed_origins="*",
